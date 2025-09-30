@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galerie Culinaire - GastroGlobe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components/header.css">
+    <link rel="stylesheet" href="../css/components/footer.css">
+    <link rel="stylesheet" href="../css/components/auth.css">
+    <link rel="stylesheet" href="../css/pages/galerie.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html">
+                        <i class="fas fa-globe-americas"></i>
+                        <span>GastroGlobe</span>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="../index.html">Accueil</a></li>
+                        <li><a href="carte.html">Carte Interactive</a></li>
+                        <li><a href="recettes.html">Recettes</a></li>
+                        <li><a href="galerie.html" class="active">Galerie</a></li>
+                        <li><a href="quiz.html">Quiz</a></li>
+                        <li><a href="profil.html">Profil</a></li>
+                    </ul>
+                </nav>
+                <div class="header-actions">
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <div class="user-info">
+                            <div class="user-avatar" id="userAvatarHeader"></div>
+                            <span id="userNameHeader"></span>
+                        </div>
+                        <div class="dropdown-menu">
+                            <a href="profil.html"><i class="fas fa-user"></i> Mon Profil</a>
+                            <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+                        </div>
+                    </div>
+                    <div class="auth-buttons" id="authButtons">
+                        <button class="btn btn-outline" id="loginBtn">Connexion</button>
+                        <button class="btn btn-primary" id="registerBtn">Inscription</button>
+                    </div>
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="page-header">
+        <div class="container">
+            <div class="page-header-content">
+                <h1>Galerie Culinaire</h1>
+                <p>Admirez la beauté visuelle des plats du monde entier</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="gallery-section">
+        <div class="container">
+            <div class="gallery-controls">
+                <div class="filter-group">
+                    <label for="continentFilter">Continent:</label>
+                    <select id="continentFilter" class="filter-select">
+                        <option value="all">Tous les continents</option>
+                        <option value="europe">Europe</option>
+                        <option value="asia">Asie</option>
+                        <option value="africa">Afrique</option>
+                        <option value="americas">Amériques</option>
+                        <option value="oceania">Océanie</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="categoryFilter">Catégorie:</label>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="all">Toutes les catégories</option>
+                        <option value="entree">Entrée</option>
+                        <option value="plat">Plat principal</option>
+                        <option value="dessert">Dessert</option>
+                        <option value="boisson">Boisson</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" id="resetFilters">
+                    <i class="fas fa-redo"></i> Réinitialiser
+                </button>
+            </div>
+
+            <div class="masonry-grid" id="galleryGrid">
+                <!-- Gallery items will be loaded here -->
+            </div>
+
+            <div class="load-more">
+                <button class="btn btn-primary" id="loadMoreBtn">
+                    <i class="fas fa-plus"></i> Charger plus d'images
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <span class="close-lightbox">&times;</span>
+            <img id="lightboxImage" src="" alt="">
+            <div class="lightbox-info">
+                <h3 id="lightboxTitle"></h3>
+                <p id="lightboxDescription"></p>
+                <div class="lightbox-meta">
+                    <span id="lightboxCountry"></span>
+                    <span id="lightboxCategory"></span>
+                </div>
+            </div>
+            <div class="lightbox-navigation">
+                <button class="btn btn-outline" id="prevImage">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="btn btn-outline" id="nextImage">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-globe-americas"></i>
+                        <span>GastroGlobe</span>
+                    </div>
+                    <p class="footer-description">
+                        Découvrir le monde à travers sa cuisine. Explorez, apprenez et partagez les saveurs du monde entier.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Explorer</h3>
+                    <ul class="footer-links">
+                        <li><a href="../index.html">Accueil</a></li>
+                        <li><a href="carte.html">Carte Interactive</a></li>
+                        <li><a href="recettes.html">Recettes</a></li>
+                        <li><a href="galerie.html">Galerie</a></li>
+                        <li><a href="quiz.html">Quiz</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>À propos</h3>
+                    <ul class="footer-links">
+                        <li><a href="apropos.html">Notre mission</a></li>
+                        <li><a href="apropos.html">Équipe</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="apropos.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Légal</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Politique de confidentialité</a></li>
+                        <li><a href="#">Conditions d'utilisation</a></li>
+                        <li><a href="#">Mentions légales</a></li>
+                        <li><a href="#">Cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GastroGlobe. Tous droits réservés.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Accessibilité</a>
+                    <a href="#">Plan du site</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Auth Modals -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Connexion</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Mot de passe</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Se connecter</button>
+            </form>
+            <div class="auth-switch">
+                <p>Pas encore de compte ? <a href="#" id="switchToRegister">S'inscrire</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Inscription</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Nom d'utilisateur</label>
+                    <input type="text" id="registerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Mot de passe</label>
+                    <input type="password" id="registerPassword" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword">Confirmer le mot de passe</label>
+                    <input type="password" id="registerConfirmPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Choisissez un avatar</label>
+                    <div class="avatar-options">
+                        <div class="avatar-option" data-avatar="👨‍🍳">👨‍🍳</div>
+                        <div class="avatar-option" data-avatar="👩‍🍳">👩‍🍳</div>
+                        <div class="avatar-option" data-avatar="🧑‍🍳">🧑‍🍳</div>
+                        <div class="avatar-option" data-avatar="🍕">🍕</div>
+                        <div class="avatar-option" data-avatar="🍣">🍣</div>
+                        <div class="avatar-option" data-avatar="🌮">🌮</div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">S'inscrire</button>
+            </form>
+            <div class="auth-switch">
+                <p>Déjà un compte ? <a href="#" id="switchToLogin">Se connecter</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/gallery.js"></script>
+</body>
+</html>

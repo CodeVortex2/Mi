@@ -1,0 +1,233 @@
+/* Gallery Page Styles */
+.gallery-section {
+    padding: 60px 0;
+}
+
+.gallery-controls {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    align-items: end;
+}
+
+.masonry-grid {
+    columns: 4 300px;
+    column-gap: 20px;
+    margin-bottom: 40px;
+}
+
+.gallery-item {
+    break-inside: avoid;
+    margin-bottom: 20px;
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    cursor: pointer;
+    background: var(--light);
+}
+
+.gallery-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.gallery-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: var(--transition);
+}
+
+.gallery-item:hover .gallery-image {
+    transform: scale(1.05);
+}
+
+.gallery-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    padding: 20px;
+    transform: translateY(100%);
+    transition: var(--transition);
+}
+
+.gallery-item:hover .gallery-overlay {
+    transform: translateY(0);
+}
+
+.gallery-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.gallery-meta {
+    display: flex;
+    gap: 10px;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Lightbox Styles */
+.lightbox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.lightbox.active {
+    display: flex;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    background: var(--light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    animation: lightboxSlideIn 0.3s ease;
+}
+
+@keyframes lightboxSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.close-lightbox {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+    z-index: 2001;
+    background: rgba(0, 0, 0, 0.5);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.close-lightbox:hover {
+    background: var(--primary);
+    transform: rotate(90deg);
+}
+
+#lightboxImage {
+    max-width: 70%;
+    max-height: 80vh;
+    object-fit: contain;
+}
+
+.lightbox-info {
+    padding: 30px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.lightbox-info h3 {
+    color: var(--dark);
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.lightbox-info p {
+    color: var(--text-light);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.lightbox-meta {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.lightbox-meta span {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.lightbox-navigation {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.lightbox-navigation .btn {
+    padding: 10px 15px;
+}
+
+.load-more {
+    text-align: center;
+    margin-top: 40px;
+}
+
+/* Responsive Gallery */
+@media (max-width: 1024px) {
+    .masonry-grid {
+        columns: 3 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .masonry-grid {
+        columns: 2 200px;
+    }
+    
+    .lightbox-content {
+        flex-direction: column;
+        max-height: 95%;
+    }
+    
+    #lightboxImage {
+        max-width: 100%;
+        max-height: 50vh;
+    }
+    
+    .lightbox-info {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .masonry-grid {
+        columns: 1 300px;
+    }
+    
+    .gallery-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

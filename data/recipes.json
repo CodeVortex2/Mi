@@ -1,0 +1,94 @@
+[
+    {
+        "id": 1,
+        "name": "Ratatouille",
+        "country": "France",
+        "region": "Provence",
+        "category": "vegan",
+        "difficulty": "medium",
+        "time": "45 min",
+        "servings": 4,
+        "image": "https://images.unsplash.com/photo-1572453800999-e8d2d1589b7c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+        "description": "Un plat traditionnel provençal à base de légumes d'été frais, mijoté avec des herbes de Provence.",
+        "ingredients": [
+            "2 aubergines",
+            "2 courgettes",
+            "2 poivrons (rouge et jaune)",
+            "4 tomates",
+            "2 oignons",
+            "4 gousses d'ail",
+            "Herbes de Provence",
+            "Huile d'olive",
+            "Sel et poivre"
+        ],
+        "steps": [
+            "Couper tous les légumes en dés réguliers",
+            "Faire revenir les oignons et l'ail dans l'huile d'olive",
+            "Ajouter les aubergines et faire revenir 5 minutes",
+            "Incorporer les courgettes et poivrons, cuire 5 minutes supplémentaires",
+            "Ajouter les tomates et les herbes de Provence",
+            "Laisser mijoter à feu doux pendant 30 minutes",
+            "Saler, poivrer et servir chaud"
+        ],
+        "tips": [
+            "Laissez reposer la ratatouille une nuit pour plus de saveur",
+            "Servez avec du pain frais pour tremper dans la sauce"
+        ],
+        "nutrition": {
+            "calories": 180,
+            "proteins": 4,
+            "carbs": 20,
+            "fats": 10
+        },
+        "rating": 4.7,
+        "reviews": 128
+    },
+    {
+        "id": 2,
+        "name": "Sushi Variés",
+        "country": "Japon",
+        "region": "Tokyo",
+        "category": "seafood",
+        "difficulty": "hard",
+        "time": "60 min",
+        "servings": 2,
+        "image": "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
+        "description": "Assortiment de sushis traditionnels japonais avec poisson frais, riz vinaigré et algues nori.",
+        "ingredients": [
+            "200g de riz à sushi",
+            "250ml d'eau",
+            "3 cuillères à soupe de vinaigre de riz",
+            "1 cuillère à soupe de sucre",
+            "1 cuillère à café de sel",
+            "4 feuilles d'algue nori",
+            "200g de saumon frais",
+            "100g de thon frais",
+            "1 avocat",
+            "1 concombre",
+            "Wasabi",
+            "Sauce soja",
+            "Gingembre mariné"
+        ],
+        "steps": [
+            "Laver le riz jusqu'à ce que l'eau soit claire",
+            "Cuire le riz avec l'eau pendant 15 minutes",
+            "Mélanger vinaigre, sucre et sel, incorporer au riz chaud",
+            "Couper le poisson et les légumes en fines lamelles",
+            "Étaler le riz sur les feuilles de nori",
+            "Ajouter les garnitures et rouler fermement",
+            "Couper les rouleaux en portions et servir"
+        ],
+        "tips": [
+            "Utilisez un couteau très affûté pour couper les sushis",
+            "Trempez légèrement dans la sauce soja, pas trop"
+        ],
+        "nutrition": {
+            "calories": 220,
+            "proteins": 12,
+            "carbs": 35,
+            "fats": 8
+        },
+        "rating": 4.8,
+        "reviews": 215
+    }
+]

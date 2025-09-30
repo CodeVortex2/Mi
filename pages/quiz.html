@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Culinaire - GastroGlobe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/components/header.css">
+    <link rel="stylesheet" href="../css/components/footer.css">
+    <link rel="stylesheet" href="../css/components/auth.css">
+    <link rel="stylesheet" href="../css/pages/quiz.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="../index.html">
+                        <i class="fas fa-globe-americas"></i>
+                        <span>GastroGlobe</span>
+                    </a>
+                </div>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="../index.html">Accueil</a></li>
+                        <li><a href="carte.html">Carte Interactive</a></li>
+                        <li><a href="recettes.html">Recettes</a></li>
+                        <li><a href="galerie.html">Galerie</a></li>
+                        <li><a href="quiz.html" class="active">Quiz</a></li>
+                        <li><a href="profil.html">Profil</a></li>
+                    </ul>
+                </nav>
+                <div class="header-actions">
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <div class="user-info">
+                            <div class="user-avatar" id="userAvatarHeader"></div>
+                            <span id="userNameHeader"></span>
+                        </div>
+                        <div class="dropdown-menu">
+                            <a href="profil.html"><i class="fas fa-user"></i> Mon Profil</a>
+                            <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+                        </div>
+                    </div>
+                    <div class="auth-buttons" id="authButtons">
+                        <button class="btn btn-outline" id="loginBtn">Connexion</button>
+                        <button class="btn btn-primary" id="registerBtn">Inscription</button>
+                    </div>
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="page-header">
+        <div class="container">
+            <div class="page-header-content">
+                <h1>Quiz Culinaire</h1>
+                <p>Testez vos connaissances sur les cuisines du monde</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="quiz-section">
+        <div class="container">
+            <div class="quiz-stats">
+                <div class="stat-card">
+                    <i class="fas fa-trophy"></i>
+                    <div>
+                        <span class="stat-number" id="userScore">0</span>
+                        <span class="stat-label">Score Total</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <span class="stat-number" id="quizzesCompleted">0</span>
+                        <span class="stat-label">Quiz Terminés</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-star"></i>
+                    <div>
+                        <span class="stat-number" id="correctAnswers">0%</span>
+                        <span class="stat-label">Précision</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-categories">
+                <h2>Choisissez une catégorie</h2>
+                <div class="categories-grid">
+                    <div class="category-card" data-category="world">
+                        <div class="category-icon">
+                            <i class="fas fa-globe-americas"></i>
+                        </div>
+                        <h3>Cuisines du Monde</h3>
+                        <p>Testez vos connaissances générales</p>
+                        <span class="difficulty easy">Facile</span>
+                    </div>
+                    <div class="category-card" data-category="europe">
+                        <div class="category-icon">
+                            <i class="fas fa-flag"></i>
+                        </div>
+                        <h3>Cuisine Européenne</h3>
+                        <p>Spécialités culinaires d'Europe</p>
+                        <span class="difficulty medium">Moyen</span>
+                    </div>
+                    <div class="category-card" data-category="asia">
+                        <div class="category-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <h3>Cuisine Asiatique</h3>
+                        <p>Saveurs et traditions d'Asie</p>
+                        <span class="difficulty hard">Difficile</span>
+                    </div>
+                    <div class="category-card" data-category="ingredients">
+                        <div class="category-icon">
+                            <i class="fas fa-carrot"></i>
+                        </div>
+                        <h3>Ingrédients</h3>
+                        <p>Reconnaître les produits du monde</p>
+                        <span class="difficulty expert">Expert</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-container" id="quizContainer" style="display: none;">
+                <div class="quiz-header">
+                    <div class="quiz-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <span id="progressText">Question 1/10</span>
+                    </div>
+                    <div class="quiz-score">
+                        Score: <span id="currentScore">0</span>
+                    </div>
+                </div>
+
+                <div class="quiz-content">
+                    <div class="question-section">
+                        <h2 id="questionText">De quel pays vient ce plat ?</h2>
+                        <div class="question-image" id="questionImage" style="display: none;">
+                            <img src="" alt="" id="questionImg">
+                        </div>
+                    </div>
+
+                    <div class="options-grid" id="optionsGrid">
+                        <!-- Options will be loaded here -->
+                    </div>
+
+                    <div class="quiz-feedback" id="quizFeedback" style="display: none;">
+                        <div class="feedback-content">
+                            <i class="fas fa-check" id="feedbackIcon"></i>
+                            <p id="feedbackText"></p>
+                        </div>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button class="btn btn-secondary" id="prevQuestion" style="display: none;">
+                            <i class="fas fa-chevron-left"></i> Précédent
+                        </button>
+                        <button class="btn btn-primary" id="nextQuestion">
+                            Suivant <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quiz-results" id="quizResults" style="display: none;">
+                <div class="results-content">
+                    <div class="results-header">
+                        <i class="fas fa-trophy" id="resultsIcon"></i>
+                        <h2 id="resultsTitle">Quiz Terminé !</h2>
+                    </div>
+                    <div class="results-stats">
+                        <div class="result-stat">
+                            <span class="stat-value" id="finalScore">0</span>
+                            <span class="stat-label">Score Final</span>
+                        </div>
+                        <div class="result-stat">
+                            <span class="stat-value" id="correctCount">0</span>
+                            <span class="stat-label">Bonnes Réponses</span>
+                        </div>
+                        <div class="result-stat">
+                            <span class="stat-value" id="accuracy">0%</span>
+                            <span class="stat-label">Précision</span>
+                        </div>
+                    </div>
+                    <div class="results-actions">
+                        <button class="btn btn-primary" id="restartQuiz">
+                            <i class="fas fa-redo"></i> Recommencer
+                        </button>
+                        <button class="btn btn-secondary" id="chooseCategory">
+                            <i class="fas fa-list"></i> Autre Catégorie
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-globe-americas"></i>
+                        <span>GastroGlobe</span>
+                    </div>
+                    <p class="footer-description">
+                        Découvrir le monde à travers sa cuisine. Explorez, apprenez et partagez les saveurs du monde entier.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Explorer</h3>
+                    <ul class="footer-links">
+                        <li><a href="../index.html">Accueil</a></li>
+                        <li><a href="carte.html">Carte Interactive</a></li>
+                        <li><a href="recettes.html">Recettes</a></li>
+                        <li><a href="galerie.html">Galerie</a></li>
+                        <li><a href="quiz.html">Quiz</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>À propos</h3>
+                    <ul class="footer-links">
+                        <li><a href="apropos.html">Notre mission</a></li>
+                        <li><a href="apropos.html">Équipe</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="apropos.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Légal</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Politique de confidentialité</a></li>
+                        <li><a href="#">Conditions d'utilisation</a></li>
+                        <li><a href="#">Mentions légales</a></li>
+                        <li><a href="#">Cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GastroGlobe. Tous droits réservés.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Accessibilité</a>
+                    <a href="#">Plan du site</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Auth Modals -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Connexion</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Mot de passe</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Se connecter</button>
+            </form>
+            <div class="auth-switch">
+                <p>Pas encore de compte ? <a href="#" id="switchToRegister">S'inscrire</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Inscription</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Nom d'utilisateur</label>
+                    <input type="text" id="registerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Mot de passe</label>
+                    <input type="password" id="registerPassword" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword">Confirmer le mot de passe</label>
+                    <input type="password" id="registerConfirmPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Choisissez un avatar</label>
+                    <div class="avatar-options">
+                        <div class="avatar-option" data-avatar="👨‍🍳">👨‍🍳</div>
+                        <div class="avatar-option" data-avatar="👩‍🍳">👩‍🍳</div>
+                        <div class="avatar-option" data-avatar="🧑‍🍳">🧑‍🍳</div>
+                        <div class="avatar-option" data-avatar="🍕">🍕</div>
+                        <div class="avatar-option" data-avatar="🍣">🍣</div>
+                        <div class="avatar-option" data-avatar="🌮">🌮</div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">S'inscrire</button>
+            </form>
+            <div class="auth-switch">
+                <p>Déjà un compte ? <a href="#" id="switchToLogin">Se connecter</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/quiz.js"></script>
+</body>
+</html>
