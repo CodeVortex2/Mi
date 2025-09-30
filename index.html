@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GastroGlobe - La cuisine comme lien universel</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #e74c3c;
+            --primary-dark: #c0392b;
+            --secondary: #f39c12;
+            --accent: #2ecc71;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --text: #333;
+            --bg-light: #f9f9f9;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            --primary: #e74c3c;
+            --primary-dark: #c0392b;
+            --secondary: #f39c12;
+            --accent: #2ecc71;
+            --dark: #ecf0f1;
+            --light: #2c3e50;
+            --text: #f9f9f9;
+            --bg-light: #34495e;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text);
+            transition: var(--transition);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--light);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--primary);
+            transition: var(--transition);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text);
+            cursor: pointer;
+            margin-left: 15px;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 80vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 0 20px;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        /* Section Styles */
+        section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .section-title p {
+            max-width: 700px;
+            margin: 0 auto;
+            color: var(--text);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Interactive Map */
+        #map {
+            height: 500px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        /* Recipe Cards */
+        .recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .recipe-card {
+            background-color: var(--light);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .recipe-img {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .recipe-content {
+            padding: 20px;
+        }
+
+        .recipe-title {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .recipe-description {
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+
+        .recipe-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        /* Gallery */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            height: 200px;
+            cursor: pointer;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            color: white;
+            padding: 15px;
+            transform: translateY(100%);
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover .gallery-overlay {
+            transform: translateY(0);
+        }
+
+        /* Quiz */
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--light);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .quiz-question {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .quiz-option {
+            padding: 15px;
+            background-color: var(--bg-light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .quiz-option:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .quiz-option.selected {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .quiz-navigation {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Profile */
+        .profile-container {
+            display: flex;
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .profile-sidebar {
+            flex: 1;
+            background-color: var(--light);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+        }
+
+        .profile-content {
+            flex: 2;
+            background-color: var(--light);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .favorite-item {
+            background-color: var(--bg-light);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 50px 0 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--secondary);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-column a:hover {
+            color: var(--secondary);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .social-icons a:hover {
+            background-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            nav ul {
+                gap: 15px;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .profile-container {
+                flex-direction: column;
+            }
+            
+            .quiz-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--light);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Filter */
+        .filter-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: var(--light);
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <i class="fas fa-globe-americas"></i>
+                <span>GastroGlobe</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#home">Accueil</a></li>
+                    <li><a href="#map-section">Carte</a></li>
+                    <li><a href="#recipes">Recettes</a></li>
+                    <li><a href="#gallery">Galerie</a></li>
+                    <li><a href="#quiz">Quiz</a></li>
+                    <li><a href="#profile">Profil</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <button class="btn btn-primary" id="loginBtn">Connexion</button>
+                <button class="btn btn-secondary" id="registerBtn">Inscription</button>
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Découvrir le monde à travers sa cuisine</h1>
+            <p>Explorez les saveurs du monde entier, apprenez des recettes authentiques et connectez-vous avec les cultures à travers leurs traditions culinaires.</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary">Explorer la carte</button>
+                <button class="btn btn-secondary">Découvrir des recettes</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Map Section -->
+    <section id="map-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Carte Interactive Culinaire</h2>
+                <p>Cliquez sur les marqueurs pour découvrir les plats emblématiques de chaque région</p>
+            </div>
+            <div class="filter-container">
+                <select class="filter-select" id="continentFilter">
+                    <option value="all">Tous les continents</option>
+                    <option value="europe">Europe</option>
+                    <option value="asia">Asie</option>
+                    <option value="africa">Afrique</option>
+                    <option value="americas">Amériques</option>
+                    <option value="oceania">Océanie</option>
+                </select>
+                <select class="filter-select" id="dishTypeFilter">
+                    <option value="all">Tous les types</option>
+                    <option value="entree">Entrée</option>
+                    <option value="plat">Plat principal</option>
+                    <option value="dessert">Dessert</option>
+                    <option value="boisson">Boisson</option>
+                </select>
+            </div>
+            <div id="map"></div>
+        </div>
+    </section>
+
+    <!-- Recipes Section -->
+    <section id="recipes">
+        <div class="container">
+            <div class="section-title">
+                <h2>Recettes du Monde</h2>
+                <p>Découvrez des recettes authentiques de différentes cultures</p>
+            </div>
+            <div class="filter-container">
+                <select class="filter-select" id="countryFilter">
+                    <option value="all">Tous les pays</option>
+                    <option value="france">France</option>
+                    <option value="italy">Italie</option>
+                    <option value="japan">Japon</option>
+                    <option value="mexico">Mexique</option>
+                    <option value="india">Inde</option>
+                    <option value="thailand">Thaïlande</option>
+                </select>
+                <select class="filter-select" id="categoryFilter">
+                    <option value="all">Toutes les catégories</option>
+                    <option value="rapide">Rapide</option>
+                    <option value="vegan">Vegan</option>
+                    <option value="epice">Épicé</option>
+                    <option value="sucre">Sucré</option>
+                </select>
+            </div>
+            <div class="recipes-grid">
+                <!-- Recipe cards will be generated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery">
+        <div class="container">
+            <div class="section-title">
+                <h2>Galerie Multimédia</h2>
+                <p>Admirez la beauté visuelle des plats du monde entier</p>
+            </div>
+            <div class="filter-container">
+                <select class="filter-select" id="galleryContinentFilter">
+                    <option value="all">Tous les continents</option>
+                    <option value="europe">Europe</option>
+                    <option value="asia">Asie</option>
+                    <option value="africa">Afrique</option>
+                    <option value="americas">Amériques</option>
+                    <option value="oceania">Océanie</option>
+                </select>
+            </div>
+            <div class="gallery-grid">
+                <!-- Gallery items will be generated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Quiz Section -->
+    <section id="quiz">
+        <div class="container">
+            <div class="section-title">
+                <h2>Quiz Culinaire</h2>
+                <p>Testez vos connaissances sur les cuisines du monde</p>
+            </div>
+            <div class="quiz-container">
+                <div class="quiz-question" id="quizQuestion">De quel pays vient ce plat ?</div>
+                <div class="quiz-options" id="quizOptions">
+                    <!-- Options will be generated by JavaScript -->
+                </div>
+                <div class="quiz-navigation">
+                    <button class="btn btn-secondary" id="prevQuestion">Précédent</button>
+                    <button class="btn btn-primary" id="nextQuestion">Suivant</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Profile Section -->
+    <section id="profile">
+        <div class="container">
+            <div class="section-title">
+                <h2>Mon Profil</h2>
+                <p>Gérez vos favoris et vos préférences</p>
+            </div>
+            <div class="profile-container">
+                <div class="profile-sidebar">
+                    <div class="profile-avatar" id="userAvatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3 id="userName">Invité</h3>
+                    <p id="userEmail"></p>
+                    <div class="user-stats">
+                        <p>Recettes favorites: <span id="favoriteCount">0</span></p>
+                        <p>Score quiz: <span id="quizScore">0</span></p>
+                    </div>
+                    <button class="btn btn-primary" id="editProfileBtn">Modifier le profil</button>
+                </div>
+                <div class="profile-content">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="favorites">Mes Favoris</div>
+                        <div class="tab" data-tab="history">Historique</div>
+                        <div class="tab" data-tab="settings">Paramètres</div>
+                    </div>
+                    <div class="tab-content active" id="favorites">
+                        <h3>Mes recettes favorites</h3>
+                        <div class="favorites-grid" id="favoritesGrid">
+                            <!-- Favorites will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="tab-content" id="history">
+                        <h3>Mon historique</h3>
+                        <p>Vos dernières activités apparaîtront ici.</p>
+                    </div>
+                    <div class="tab-content" id="settings">
+                        <h3>Paramètres</h3>
+                        <div class="form-group">
+                            <label for="languageSelect">Langue</label>
+                            <select class="filter-select" id="languageSelect">
+                                <option value="fr">Français</option>
+                                <option value="en">English</option>
+                                <option value="es">Español</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="notifications">Notifications</label>
+                            <input type="checkbox" id="notifications" checked>
+                            <label for="notifications">Recevoir des notifications</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>GastroGlobe</h3>
+                    <p>Découvrir le monde à travers sa cuisine. Explorez, apprenez et partagez les saveurs du monde entier.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Explorer</h3>
+                    <ul>
+                        <li><a href="#home">Accueil</a></li>
+                        <li><a href="#map-section">Carte interactive</a></li>
+                        <li><a href="#recipes">Recettes</a></li>
+                        <li><a href="#gallery">Galerie</a></li>
+                        <li><a href="#quiz">Quiz</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>À propos</h3>
+                    <ul>
+                        <li><a href="#">Notre mission</a></li>
+                        <li><a href="#">Équipe</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Légal</h3>
+                    <ul>
+                        <li><a href="#">Politique de confidentialité</a></li>
+                        <li><a href="#">Conditions d'utilisation</a></li>
+                        <li><a href="#">Mentions légales</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 GastroGlobe. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Connexion</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Mot de passe</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Se connecter</button>
+            </form>
+            <p>Pas encore de compte ? <a href="#" id="switchToRegister">S'inscrire</a></p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Inscription</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Nom d'utilisateur</label>
+                    <input type="text" id="registerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Mot de passe</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword">Confirmer le mot de passe</label>
+                    <input type="password" id="registerConfirmPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">S'inscrire</button>
+            </form>
+            <p>Déjà un compte ? <a href="#" id="switchToLogin">Se connecter</a></p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Sample data for the application
+        const sampleData = {
+            recipes: [
+                {
+                    id: 1,
+                    name: "Ratatouille",
+                    country: "France",
+                    category: "vegan",
+                    image: "https://images.unsplash.com/photo-1572453800999-e8d2d1589b7c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+                    description: "Un plat traditionnel provençal à base de légumes d'été.",
+                    ingredients: ["Aubergines", "Courgettes", "Poivrons", "Tomates", "Oignons", "Ail", "Herbes de Provence"],
+                    time: "45 min",
+                    difficulty: "Moyen"
+                },
+                {
+                    id: 2,
+                    name: "Sushi",
+                    country: "Japon",
+                    category: "rapide",
+                    image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+                    description: "Des boulettes de riz vinaigré garnies de poisson cru ou de légumes.",
+                    ingredients: ["Riz à sushi", "Vinaigre de riz", "Sucre", "Sel", "Poisson cru", "Algues nori", "Wasabi"],
+                    time: "60 min",
+                    difficulty: "Difficile"
+                },
+                {
+                    id: 3,
+                    name: "Tacos",
+                    country: "Mexique",
+                    category: "epice",
+                    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1981&q=80",
+                    description: "Des tortillas de maïs garnies de viande, légumes et sauces.",
+                    ingredients: ["Tortillas de maïs", "Boeuf haché", "Oignons", "Tomates", "Laitue", "Fromage", "Sauce piquante"],
+                    time: "30 min",
+                    difficulty: "Facile"
+                },
+                {
+                    id: 4,
+                    name: "Pad Thai",
+                    country: "Thaïlande",
+                    category: "epice",
+                    image: "https://images.unsplash.com/photo-1559314809-0f155186bb2e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80",
+                    description: "Nouilles de riz sautées avec des crevettes, du tofu et des arachides.",
+                    ingredients: ["Nouilles de riz", "Crevettes", "Tofu", "Germes de soja", "Oignons", "Ail", "Sauce de poisson", "Piments"],
+                    time: "25 min",
+                    difficulty: "Moyen"
+                },
+                {
+                    id: 5,
+                    name: "Tiramisu",
+                    country: "Italie",
+                    category: "sucre",
+                    image: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+                    description: "Un dessert italien à base de mascarpone, café et cacao.",
+                    ingredients: ["Mascarpone", "Oeufs", "Sucre", "Biscuits à la cuillère", "Café fort", "Cacao en poudre"],
+                    time: "30 min",
+                    difficulty: "Facile"
+                },
+                {
+                    id: 6,
+                    name: "Biryani",
+                    country: "Inde",
+                    category: "epice",
+                    image: "https://images.unsplash.com/photo-1563379091339-03246963d96f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+                    description: "Un plat de riz épicé avec de la viande ou des légumes.",
+                    ingredients: ["Riz basmati", "Poulet ou agneau", "Oignons", "Yaourt", "Épices biryani", "Safran"],
+                    time: "90 min",
+                    difficulty: "Difficile"
+                }
+            ],
+            gallery: [
+                {
+                    id: 1,
+                    title: "Sushi japonais",
+                    continent: "asia",
+                    image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                },
+                {
+                    id: 2,
+                    title: "Pizza italienne",
+                    continent: "europe",
+                    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1981&q=80"
+                },
+                {
+                    id: 3,
+                    title: "Tacos mexicains",
+                    continent: "americas",
+                    image: "https://images.unsplash.com/photo-1565299585323-38174c13fae8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                },
+                {
+                    id: 4,
+                    title: "Couscous marocain",
+                    continent: "africa",
+                    image: "https://images.unsplash.com/photo-1543339302-43ffd0e0b79e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                },
+                {
+                    id: 5,
+                    title: "Pavlova australienne",
+                    continent: "oceania",
+                    image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                },
+                {
+                    id: 6,
+                    title: "Croissant français",
+                    continent: "europe",
+                    image: "https://images.unsplash.com/photo-1555507036-ab794f27d2e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                },
+                {
+                    id: 7,
+                    title: "Pho vietnamien",
+                    continent: "asia",
+                    image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80"
+                },
+                {
+                    id: 8,
+                    title: "Feijoada brésilienne",
+                    continent: "americas",
+                    image: "https://images.unsplash.com/photo-1546549032-9571cd6b27df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
+                }
+            ],
+            quiz: [
+                {
+                    question: "De quel pays vient la paella ?",
+                    options: ["Italie", "Espagne", "France", "Portugal"],
+                    correct: 1
+                },
+                {
+                    question: "Quel est l'ingrédient principal du hummus ?",
+                    options: ["Lentilles", "Pois chiches", "Fèves", "Haricots rouges"],
+                    correct: 1
+                },
+                {
+                    question: "Dans quel pays est originaire le kimchi ?",
+                    options: ["Chine", "Japon", "Corée", "Vietnam"],
+                    correct: 2
+                },
+                {
+                    question: "Quel fromage est traditionnellement utilisé pour la pizza Margherita ?",
+                    options: ["Gouda", "Mozzarella", "Parmesan", "Cheddar"],
+                    correct: 1
+                },
+                {
+                    question: "Quel plat est considéré comme le plat national de l'Angleterre ?",
+                    options: ["Fish and Chips", "Bangers and Mash", "Roast Beef", "Shepherd's Pie"],
+                    correct: 0
+                }
+            ],
+            mapMarkers: [
+                {
+                    lat: 48.8566,
+                    lng: 2.3522,
+                    title: "France",
+                    dish: "Coq au Vin",
+                    description: "Un plat traditionnel français à base de poulet mijoté dans du vin rouge avec des lardons, des champignons et des oignons.",
+                    type: "plat",
+                    continent: "europe"
+                },
+                {
+                    lat: 35.6762,
+                    lng: 139.6503,
+                    title: "Japon",
+                    dish: "Sushi",
+                    description: "Des boulettes de riz vinaigré garnies de poisson cru ou de légumes, souvent servies avec de la sauce soja et du wasabi.",
+                    type: "plat",
+                    continent: "asia"
+                },
+                {
+                    lat: 19.4326,
+                    lng: -99.1332,
+                    title: "Mexique",
+                    dish: "Tacos",
+                    description: "Des tortillas de maïs garnies de viande, légumes, fromage et sauces, un plat emblématique de la cuisine mexicaine.",
+                    type: "plat",
+                    continent: "americas"
+                },
+                {
+                    lat: 41.9028,
+                    lng: 12.4964,
+                    title: "Italie",
+                    dish: "Pizza Margherita",
+                    description: "Une pizza simple avec de la sauce tomate, de la mozzarella et du basilic, représentant les couleurs du drapeau italien.",
+                    type: "plat",
+                    continent: "europe"
+                },
+                {
+                    lat: 28.6139,
+                    lng: 77.2090,
+                    title: "Inde",
+                    dish: "Biryani",
+                    description: "Un plat de riz épicé avec de la viande ou des légumes, originaire du sous-continent indien.",
+                    type: "plat",
+                    continent: "asia"
+                },
+                {
+                    lat: 30.0444,
+                    lng: 31.2357,
+                    title: "Égypte",
+                    dish: "Koshari",
+                    description: "Un plat populaire égyptien à base de riz, lentilles, pâtes, pois chiches et sauce tomate épicée.",
+                    type: "plat",
+                    continent: "africa"
+                },
+                {
+                    lat: -33.8688,
+                    lng: 151.2093,
+                    title: "Australie",
+                    dish: "Pavlova",
+                    description: "Un dessert à base de meringue croustillante à l'extérieur et moelleuse à l'intérieur, garni de crème et de fruits.",
+                    type: "dessert",
+                    continent: "oceania"
+                },
+                {
+                    lat: -15.7975,
+                    lng: -47.8919,
+                    title: "Brésil",
+                    dish: "Feijoada",
+                    description: "Un ragoût de haricots noirs avec de la viande de porc, considéré comme le plat national du Brésil.",
+                    type: "plat",
+                    continent: "americas"
+                }
+            ]
+        };
+
+        // Application state
+        let appState = {
+            currentUser: null,
+            favorites: [],
+            quizScore: 0,
+            currentQuizQuestion: 0,
+            selectedQuizOption: null,
+            darkMode: false
+        };
+
+        // DOM Elements
+        const themeToggle = document.getElementById('themeToggle');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const loginModal = document.getElementById('loginModal');
+        const registerModal = document.getElementById('registerModal');
+        const closeModalButtons = document.querySelectorAll('.close-modal');
+        const switchToRegister = document.getElementById('switchToRegister');
+        const switchToLogin = document.getElementById('switchToLogin');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const recipesGrid = document.querySelector('.recipes-grid');
+        const galleryGrid = document.querySelector('.gallery-grid');
+        const quizQuestion = document.getElementById('quizQuestion');
+        const quizOptions = document.getElementById('quizOptions');
+        const prevQuestionBtn = document.getElementById('prevQuestion');
+        const nextQuestionBtn = document.getElementById('nextQuestion');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const favoriteCount = document.getElementById('favoriteCount');
+        const quizScore = document.getElementById('quizScore');
+        const favoritesGrid = document.getElementById('favoritesGrid');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Initialize the application
+        function initApp() {
+            // Check for saved user data
+            const savedUser = localStorage.getItem('gastroGlobeUser');
+            if (savedUser) {
+                appState.currentUser = JSON.parse(savedUser);
+                updateUserInterface();
+            }
+
+            // Check for saved favorites
+            const savedFavorites = localStorage.getItem('gastroGlobeFavorites');
+            if (savedFavorites) {
+                appState.favorites = JSON.parse(savedFavorites);
+                updateFavoritesDisplay();
+            }
+
+            // Check for saved quiz score
+            const savedQuizScore = localStorage.getItem('gastroGlobeQuizScore');
+            if (savedQuizScore) {
+                appState.quizScore = parseInt(savedQuizScore);
+                quizScore.textContent = appState.quizScore;
+            }
+
+            // Check for saved theme
+            const savedTheme = localStorage.getItem('gastroGlobeDarkMode');
+            if (savedTheme === 'true') {
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                appState.darkMode = true;
+            }
+
+            // Initialize map
+            initMap();
+
+            // Load recipes
+            loadRecipes();
+
+            // Load gallery
+            loadGallery();
+
+            // Load quiz
+            loadQuiz();
+
+            // Set up event listeners
+            setupEventListeners();
+        }
+
+        // Initialize the map
+        function initMap() {
+            const map = L.map('map').setView([20, 0], 2);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Add markers to the map
+            sampleData.mapMarkers.forEach(marker => {
+                const popupContent = `
+                    <div style="text-align: center;">
+                        <h3>${marker.dish}</h3>
+                        <p><strong>${marker.title}</strong></p>
+                        <p>${marker.description}</p>
+                        <button class="btn btn-primary add-to-favorites" data-dish="${marker.dish}" data-country="${marker.title}">
+                            Ajouter aux favoris
+                        </button>
+                    </div>
+                `;
+
+                L.marker([marker.lat, marker.lng])
+                    .addTo(map)
+                    .bindPopup(popupContent);
+            });
+
+            // Set up filter functionality
+            const continentFilter = document.getElementById('continentFilter');
+            const dishTypeFilter = document.getElementById('dishTypeFilter');
+
+            // In a real implementation, we would filter markers based on these values
+            continentFilter.addEventListener('change', function() {
+                console.log('Filter by continent:', this.value);
+                // Implementation would filter markers based on continent
+            });
+
+            dishTypeFilter.addEventListener('change', function() {
+                console.log('Filter by dish type:', this.value);
+                // Implementation would filter markers based on dish type
+            });
+        }
+
+        // Load recipes into the grid
+        function loadRecipes() {
+            recipesGrid.innerHTML = '';
+            
+            sampleData.recipes.forEach(recipe => {
+                const recipeCard = document.createElement('div');
+                recipeCard.className = 'recipe-card';
+                recipeCard.innerHTML = `
+                    <img src="${recipe.image}" alt="${recipe.name}" class="recipe-img">
+                    <div class="recipe-content">
+                        <h3 class="recipe-title">${recipe.name}</h3>
+                        <p class="recipe-description">${recipe.description}</p>
+                        <div class="recipe-meta">
+                            <span><i class="fas fa-clock"></i> ${recipe.time}</span>
+                            <span><i class="fas fa-flag"></i> ${recipe.country}</span>
+                            <span><i class="fas fa-fire"></i> ${recipe.difficulty}</span>
+                        </div>
+                        <button class="btn btn-primary add-favorite" data-id="${recipe.id}">
+                            Ajouter aux favoris
+                        </button>
+                    </div>
+                `;
+                recipesGrid.appendChild(recipeCard);
+            });
+
+            // Add event listeners to favorite buttons
+            document.querySelectorAll('.add-favorite').forEach(button => {
+                button.addEventListener('click', function() {
+                    const recipeId = parseInt(this.getAttribute('data-id'));
+                    addToFavorites(recipeId);
+                });
+            });
+        }
+
+        // Load gallery items
+        function loadGallery() {
+            galleryGrid.innerHTML = '';
+            
+            sampleData.gallery.forEach(item => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                galleryItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.title}">
+                    <div class="gallery-overlay">
+                        <h3>${item.title}</h3>
+                    </div>
+                `;
+                galleryGrid.appendChild(galleryItem);
+            });
+        }
+
+        // Load quiz questions
+        function loadQuiz() {
+            if (sampleData.quiz.length === 0) return;
+            
+            const currentQuestion = sampleData.quiz[appState.currentQuizQuestion];
+            quizQuestion.textContent = currentQuestion.question;
+            
+            quizOptions.innerHTML = '';
+            currentQuestion.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'quiz-option';
+                if (index === appState.selectedQuizOption) {
+                    optionElement.classList.add('selected');
+                }
+                optionElement.textContent = option;
+                optionElement.addEventListener('click', () => {
+                    document.querySelectorAll('.quiz-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    optionElement.classList.add('selected');
+                    appState.selectedQuizOption = index;
+                });
+                quizOptions.appendChild(optionElement);
+            });
+            
+            updateQuizNavigation();
+        }
+
+        // Update quiz navigation buttons
+        function updateQuizNavigation() {
+            prevQuestionBtn.disabled = appState.currentQuizQuestion === 0;
+            nextQuestionBtn.textContent = appState.currentQuizQuestion === sampleData.quiz.length - 1 ? 'Terminer' : 'Suivant';
+        }
+
+        // Add recipe to favorites
+        function addToFavorites(recipeId) {
+            if (!appState.currentUser) {
+                alert('Veuillez vous connecter pour ajouter des favoris.');
+                loginModal.style.display = 'flex';
+                return;
+            }
+            
+            const recipe = sampleData.recipes.find(r => r.id === recipeId);
+            if (recipe && !appState.favorites.some(fav => fav.id === recipeId)) {
+                appState.favorites.push(recipe);
+                localStorage.setItem('gastroGlobeFavorites', JSON.stringify(appState.favorites));
+                updateFavoritesDisplay();
+                alert(`${recipe.name} a été ajouté à vos favoris !`);
+            } else {
+                alert('Cette recette est déjà dans vos favoris.');
+            }
+        }
+
+        // Update favorites display
+        function updateFavoritesDisplay() {
+            favoriteCount.textContent = appState.favorites.length;
+            
+            favoritesGrid.innerHTML = '';
+            if (appState.favorites.length === 0) {
+                favoritesGrid.innerHTML = '<p>Vous n\'avez pas encore de recettes favorites.</p>';
+                return;
+            }
+            
+            appState.favorites.forEach(recipe => {
+                const favoriteItem = document.createElement('div');
+                favoriteItem.className = 'favorite-item';
+                favoriteItem.innerHTML = `
+                    <img src="${recipe.image}" alt="${recipe.name}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 5px;">
+                    <h4>${recipe.name}</h4>
+                    <p>${recipe.country}</p>
+                    <button class="btn btn-secondary remove-favorite" data-id="${recipe.id}">Retirer</button>
+                `;
+                favoritesGrid.appendChild(favoriteItem);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-favorite').forEach(button => {
+                button.addEventListener('click', function() {
+                    const recipeId = parseInt(this.getAttribute('data-id'));
+                    removeFromFavorites(recipeId);
+                });
+            });
+        }
+
+        // Remove recipe from favorites
+        function removeFromFavorites(recipeId) {
+            appState.favorites = appState.favorites.filter(fav => fav.id !== recipeId);
+            localStorage.setItem('gastroGlobeFavorites', JSON.stringify(appState.favorites));
+            updateFavoritesDisplay();
+        }
+
+        // Update user interface based on login state
+        function updateUserInterface() {
+            if (appState.currentUser) {
+                loginBtn.textContent = 'Déconnexion';
+                registerBtn.style.display = 'none';
+                userName.textContent = appState.currentUser.name;
+                userEmail.textContent = appState.currentUser.email;
+                userAvatar.innerHTML = `<i class="fas fa-user"></i>`;
+                favoriteCount.textContent = appState.favorites.length;
+            } else {
+                loginBtn.textContent = 'Connexion';
+                registerBtn.style.display = 'inline-block';
+                userName.textContent = 'Invité';
+                userEmail.textContent = '';
+                userAvatar.innerHTML = `<i class="fas fa-user"></i>`;
+                favoriteCount.textContent = '0';
+            }
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Theme toggle
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                appState.darkMode = !appState.darkMode;
+                localStorage.setItem('gastroGlobeDarkMode', appState.darkMode);
+                
+                if (appState.darkMode) {
+                    this.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    this.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+            });
+
+            // Login/Register buttons
+            loginBtn.addEventListener('click', function() {
+                if (appState.currentUser) {
+                    // Logout
+                    appState.currentUser = null;
+                    localStorage.removeItem('gastroGlobeUser');
+                    updateUserInterface();
+                } else {
+                    loginModal.style.display = 'flex';
+                }
+            });
+
+            registerBtn.addEventListener('click', function() {
+                registerModal.style.display = 'flex';
+            });
+
+            // Close modals
+            closeModalButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    loginModal.style.display = 'none';
+                    registerModal.style.display = 'none';
+                });
+            });
+
+            // Switch between login and register modals
+            switchToRegister.addEventListener('click', function(e) {
+                e.preventDefault();
+                loginModal.style.display = 'none';
+                registerModal.style.display = 'flex';
+            });
+
+            switchToLogin.addEventListener('click', function(e) {
+                e.preventDefault();
+                registerModal.style.display = 'none';
+                loginModal.style.display = 'flex';
+            });
+
+            // Login form submission
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                // In a real app, this would be an API call
+                // For demo purposes, we'll just create a user
+                appState.currentUser = {
+                    name: 'Utilisateur Démo',
+                    email: email
+                };
+                
+                localStorage.setItem('gastroGlobeUser', JSON.stringify(appState.currentUser));
+                loginModal.style.display = 'none';
+                updateUserInterface();
+                alert('Connexion réussie !');
+            });
+
+            // Register form submission
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('registerName').value;
+                const email = document.getElementById('registerEmail').value;
+                const password = document.getElementById('registerPassword').value;
+                const confirmPassword = document.getElementById('registerConfirmPassword').value;
+                
+                if (password !== confirmPassword) {
+                    alert('Les mots de passe ne correspondent pas.');
+                    return;
+                }
+                
+                // In a real app, this would be an API call
+                appState.currentUser = {
+                    name: name,
+                    email: email
+                };
+                
+                localStorage.setItem('gastroGlobeUser', JSON.stringify(appState.currentUser));
+                registerModal.style.display = 'none';
+                updateUserInterface();
+                alert('Inscription réussie ! Bienvenue sur GastroGlobe.');
+            });
+
+            // Quiz navigation
+            prevQuestionBtn.addEventListener('click', function() {
+                if (appState.currentQuizQuestion > 0) {
+                    appState.currentQuizQuestion--;
+                    appState.selectedQuizOption = null;
+                    loadQuiz();
+                }
+            });
+
+            nextQuestionBtn.addEventListener('click', function() {
+                if (appState.selectedQuizOption === null) {
+                    alert('Veuillez sélectionner une réponse.');
+                    return;
+                }
+                
+                // Check if answer is correct
+                const currentQuestion = sampleData.quiz[appState.currentQuizQuestion];
+                if (appState.selectedQuizOption === currentQuestion.correct) {
+                    appState.quizScore += 10;
+                    quizScore.textContent = appState.quizScore;
+                    localStorage.setItem('gastroGlobeQuizScore', appState.quizScore);
+                }
+                
+                if (appState.currentQuizQuestion < sampleData.quiz.length - 1) {
+                    appState.currentQuizQuestion++;
+                    appState.selectedQuizOption = null;
+                    loadQuiz();
+                } else {
+                    // Quiz finished
+                    alert(`Quiz terminé ! Votre score est de ${appState.quizScore} points.`);
+                    appState.currentQuizQuestion = 0;
+                    appState.selectedQuizOption = null;
+                    loadQuiz();
+                }
+            });
+
+            // Tabs
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to current tab and content
+                    this.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // Filter functionality
+            document.getElementById('countryFilter').addEventListener('change', function() {
+                console.log('Filter recipes by country:', this.value);
+                // Implementation would filter recipes based on country
+            });
+
+            document.getElementById('categoryFilter').addEventListener('change', function() {
+                console.log('Filter recipes by category:', this.value);
+                // Implementation would filter recipes based on category
+            });
+
+            document.getElementById('galleryContinentFilter').addEventListener('change', function() {
+                console.log('Filter gallery by continent:', this.value);
+                // Implementation would filter gallery based on continent
+            });
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
