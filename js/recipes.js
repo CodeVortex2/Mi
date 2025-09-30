@@ -1,4 +1,4 @@
-// Recipes functionality for GastroGlobe - CORRECTED VERSION
+// Recipes functionality for GastroGlobe - FULLY CORRECTED VERSION
 class RecipesManager {
     constructor() {
         this.recipes = [];
@@ -30,10 +30,7 @@ class RecipesManager {
         this.isLoading = true;
         
         try {
-            // Show loading state immediately
             this.showLoading(true);
-            
-            // Simulate network delay for better UX
             await new Promise(resolve => setTimeout(resolve, 500));
             
             const response = await fetch('../data/recipes.json');
@@ -52,7 +49,6 @@ class RecipesManager {
             console.error('❌ Error loading recipes:', error);
             showToast('Erreur lors du chargement des recettes', 'error');
             
-            // Fallback to demo data
             this.recipes = this.getDemoRecipes();
             this.filteredRecipes = [...this.recipes];
             console.log('🔄 Using demo recipes:', this.recipes.length);
@@ -112,30 +108,6 @@ class RecipesManager {
                 "description": "Tacos garnis de viande épicée et légumes frais.",
                 "rating": 4.5,
                 "ingredients": ["Tortillas", "Boeuf haché", "Oignons", "Tomates"]
-            },
-            {
-                "id": 5,
-                "name": "Pad Thaï",
-                "country": "Thaïlande", 
-                "category": "poisson",
-                "difficulty": "moyen",
-                "time": "35 min",
-                "image": "https://images.unsplash.com/photo-1559314809-0f155186bb2e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-                "description": "Nouilles de riz sautées avec crevettes et arachides.",
-                "rating": 4.7,
-                "ingredients": ["Nouilles de riz", "Crevettes", "Arachides", "Germes de soja"]
-            },
-            {
-                "id": 6,
-                "name": "Tiramisu",
-                "country": "Italie",
-                "category": "dessert",
-                "difficulty": "moyen",
-                "time": "40 min",
-                "image": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-                "description": "Dessert italien au café et mascarpone.",
-                "rating": 4.9,
-                "ingredients": ["Mascarpone", "Café", "Biscuits", "Cacao"]
             }
         ];
     }
@@ -172,8 +144,6 @@ class RecipesManager {
                     this.applyFilters();
                 }, 300);
             });
-        } else {
-            console.error('❌ recipeSearch input not found!');
         }
 
         // Filters
@@ -192,8 +162,6 @@ class RecipesManager {
                     console.log(`🎯 Filter ${key}:`, this.currentFilters[key]);
                     this.applyFilters();
                 });
-            } else {
-                console.error(`❌ ${id} not found!`);
             }
         });
 
@@ -380,6 +348,69 @@ class RecipesManager {
         `;
     }
 
+    // CORRECTED AUTH METHODS
+    isFavorite(recipeId) {
+        const user = window.authManager ? window.authManager.getCurrentUser() : null;
+        return user && user.favorites && user.favorites.includes(parseInt(recipeId));
+    }
+
+    viewRecipe(recipeId) {
+        console.log('👀 Viewing recipe:', recipeId);
+        
+        // Add to history if user is logged in
+        if (window.authManager) {
+            const user = window.authManager.getCurrentUser();
+            if (user) {
+                window.authManager.addToHistory({
+                    type: "recipe_view",
+                    itemId: parseInt(recipeId)
+                });
+            }
+        }
+        
+        window.location.href = `recette-detail.html?id=${recipeId}`;
+    }
+
+    toggleFavorite(recipeId, button) {
+        if (!window.authManager) {
+            showToast('Système d\'authentification non disponible', 'error');
+            return;
+        }
+
+        const user = window.authManager.getCurrentUser();
+        if (!user) {
+            showToast('Veuillez vous connecter pour ajouter aux favoris', 'error');
+            window.authManager.showLoginModal();
+            return;
+        }
+
+        const isFavorite = this.isFavorite(recipeId);
+        
+        // Animation
+        button.style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            button.style.transform = 'scale(1)';
+        }, 150);
+
+        if (isFavorite) {
+            button.classList.remove('active');
+            button.innerHTML = '<i class="far fa-heart"></i>';
+            showToast('Recette retirée des favoris');
+        } else {
+            button.classList.add('active');
+            button.innerHTML = '<i class="fas fa-heart"></i>';
+            showToast('Recette ajoutée aux favoris !');
+            
+            // Add to history
+            window.authManager.addToHistory({
+                type: "favorite_added",
+                itemId: parseInt(recipeId)
+            });
+        }
+
+        window.authManager.toggleUserFavorite(parseInt(recipeId));
+    }
+
     animateRecipeCards() {
         const cards = document.querySelectorAll('.recipe-card');
         cards.forEach((card, index) => {
@@ -418,60 +449,6 @@ class RecipesManager {
                 this.resetFilters();
             });
         }
-    }
-
-    isFavorite(recipeId) {
-        const user = AuthManager.getCurrentUser();
-        return user && user.favorites && user.favorites.includes(parseInt(recipeId));
-    }
-
-    viewRecipe(recipeId) {
-        console.log('👀 Viewing recipe:', recipeId);
-        
-        // Add to history if user is logged in
-        const user = AuthManager.getCurrentUser();
-        if (user) {
-            AuthManager.addToHistory({
-                type: "recipe_view",
-                itemId: parseInt(recipeId)
-            });
-        }
-        
-        window.location.href = `recette-detail.html?id=${recipeId}`;
-    }
-
-    toggleFavorite(recipeId, button) {
-        if (!AuthManager.getCurrentUser()) {
-            showToast('Veuillez vous connecter pour ajouter aux favoris', 'error');
-            AuthManager.showLoginModal();
-            return;
-        }
-
-        const isFavorite = this.isFavorite(recipeId);
-        
-        // Animation
-        button.style.transform = 'scale(0.8)';
-        setTimeout(() => {
-            button.style.transform = 'scale(1)';
-        }, 150);
-
-        if (isFavorite) {
-            button.classList.remove('active');
-            button.innerHTML = '<i class="far fa-heart"></i>';
-            showToast('Recette retirée des favoris');
-        } else {
-            button.classList.add('active');
-            button.innerHTML = '<i class="fas fa-heart"></i>';
-            showToast('Recette ajoutée aux favoris !');
-            
-            // Add to history
-            AuthManager.addToHistory({
-                type: "favorite_added",
-                itemId: parseInt(recipeId)
-            });
-        }
-
-        AuthManager.toggleUserFavorite(parseInt(recipeId));
     }
 
     updateLoadMoreButton(endIndex) {
@@ -528,35 +505,16 @@ class RecipesManager {
     }
 
     setupMobileFilters() {
-        // This will be implemented for mobile view
-        console.log('📱 Mobile filters setup');
+        console.log('📱 Mobile filters setup - placeholder');
     }
 }
 
-// Initialize when DOM is ready
+// Initialisation simplifiée et robuste
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🏠 DOM loaded, initializing RecipesManager...');
+    console.log('🏠 DOM loaded, checking for recipes grid...');
     
-    // Wait a bit for auth to initialize
-    setTimeout(() => {
-        if (document.getElementById('recipesGrid')) {
-            console.log('🎯 Found recipesGrid, starting...');
-            window.recipesManager = new RecipesManager();
-        } else {
-            console.error('❌ recipesGrid not found on page!');
-        }
-    }, 100);
-});
-
-// Fallback initialization
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initRecipes);
-} else {
-    initRecipes();
-}
-
-function initRecipes() {
-    if (document.getElementById('recipesGrid') && !window.recipesManager) {
+    if (document.getElementById('recipesGrid')) {
+        console.log('🎯 Starting RecipesManager...');
         window.recipesManager = new RecipesManager();
     }
-}
+});

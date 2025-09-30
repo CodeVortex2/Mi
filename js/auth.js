@@ -19,6 +19,7 @@ class AuthManager {
         console.log('AuthManager initialized');
     }
 
+
     // Data management
     loadUsers() {
         const savedUsers = StorageManager.get('users', []);
@@ -486,7 +487,7 @@ class AuthManager {
     }
 
     // Public methods
-    getCurrentUser() {
+     getCurrentUser() {
         return this.currentUser;
     }
 
@@ -494,21 +495,28 @@ class AuthManager {
         return this.currentUser !== null;
     }
 
-    updateUserProfile(updates) {
-        if (!this.currentUser) return false;
-        
-        const userIndex = this.users.findIndex(u => u.id === this.currentUser.id);
-        if (userIndex === -1) return false;
-        
-        this.users[userIndex] = { ...this.users[userIndex], ...updates };
-        this.currentUser = this.users[userIndex];
-        this.saveUsers();
-        this.saveCurrentUser();
-        
-        return true;
+    showLoginModal() {
+        this.closeModals();
+        document.getElementById('loginModal').style.display = 'flex';
+        document.getElementById('loginEmail').focus();
     }
 
-    toggleFavorite(recipeId) {
+    showRegisterModal() {
+        this.closeModals();
+        document.getElementById('registerModal').style.display = 'flex';
+        document.getElementById('registerName').focus();
+        
+        // Reset avatar selection
+        const firstAvatar = document.querySelector('.avatar-option');
+        if (firstAvatar) {
+            document.querySelectorAll('.avatar-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            firstAvatar.classList.add('selected');
+        }
+    }
+
+    toggleUserFavorite(recipeId) {
         if (!this.currentUser) return false;
         
         const userIndex = this.users.findIndex(u => u.id === this.currentUser.id);
@@ -551,24 +559,15 @@ class AuthManager {
         
         return true;
     }
-
-    updateQuizScore(points) {
-        if (!this.currentUser) return false;
-        
-        const userIndex = this.users.findIndex(u => u.id === this.currentUser.id);
-        if (userIndex === -1) return false;
-        
-        this.users[userIndex].quizScore += points;
-        this.currentUser = this.users[userIndex];
-        this.saveUsers();
-        this.saveCurrentUser();
-        
-        return true;
-    }
 }
 
-// Create global auth instance
+// Créer une instance globale IMMÉDIATEMENT
 window.authManager = new AuthManager();
 
-// Export for use in other modules
-window.AuthManager = AuthManager;
+// Pour la compatibilité avec l'ancien code, créer aussi un alias
+window.AuthManager = {
+    getCurrentUser: () => window.authManager.getCurrentUser(),
+    showLoginModal: () => window.authManager.showLoginModal(),
+    toggleUserFavorite: (recipeId) => window.authManager.toggleUserFavorite(recipeId),
+    addToHistory: (item) => window.authManager.addToHistory(item)
+};
