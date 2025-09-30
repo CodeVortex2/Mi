@@ -1,25 +1,25 @@
 [
     {
         "id": 1,
-        "name": "Ratatouille",
+        "name": "Ratatouille Provençale",
         "country": "France",
         "region": "Provence",
         "category": "vegan",
-        "difficulty": "medium",
+        "difficulty": "moyen",
         "time": "45 min",
         "servings": 4,
         "image": "https://images.unsplash.com/photo-1572453800999-e8d2d1589b7c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-        "description": "Un plat traditionnel provençal à base de légumes d'été frais, mijoté avec des herbes de Provence.",
+        "description": "Un plat traditionnel provençal à base de légumes d'été frais, mijoté avec des herbes de Provence. La ratatouille est un classique de la cuisine méditerranéenne.",
         "ingredients": [
             "2 aubergines",
             "2 courgettes",
             "2 poivrons (rouge et jaune)",
-            "4 tomates",
+            "4 tomates bien mûres",
             "2 oignons",
             "4 gousses d'ail",
             "Herbes de Provence",
-            "Huile d'olive",
-            "Sel et poivre"
+            "Huile d'olive extra vierge",
+            "Sel et poivre noir"
         ],
         "steps": [
             "Couper tous les légumes en dés réguliers",
@@ -41,19 +41,21 @@
             "fats": 10
         },
         "rating": 4.7,
-        "reviews": 128
+        "reviews": 128,
+        "cookTime": "45 min",
+        "prepTime": "20 min"
     },
     {
         "id": 2,
-        "name": "Sushi Variés",
+        "name": "Sushi Assorti",
         "country": "Japon",
         "region": "Tokyo",
-        "category": "seafood",
-        "difficulty": "hard",
+        "category": "poisson",
+        "difficulty": "difficile",
         "time": "60 min",
         "servings": 2,
         "image": "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80",
-        "description": "Assortiment de sushis traditionnels japonais avec poisson frais, riz vinaigré et algues nori.",
+        "description": "Assortiment de sushis traditionnels japonais avec poisson frais, riz vinaigré et algues nori. Un voyage culinaire au pays du soleil levant.",
         "ingredients": [
             "200g de riz à sushi",
             "250ml d'eau",
@@ -63,7 +65,7 @@
             "4 feuilles d'algue nori",
             "200g de saumon frais",
             "100g de thon frais",
-            "1 avocat",
+            "1 avocat mûr",
             "1 concombre",
             "Wasabi",
             "Sauce soja",
@@ -89,6 +91,8 @@
             "fats": 8
         },
         "rating": 4.8,
-        "reviews": 215
+        "reviews": 215,
+        "cookTime": "20 min",
+        "prepTime": "40 min"
     }
 ]

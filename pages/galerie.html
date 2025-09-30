@@ -10,6 +10,184 @@
     <link rel="stylesheet" href="../css/components/footer.css">
     <link rel="stylesheet" href="../css/components/auth.css">
     <link rel="stylesheet" href="../css/pages/galerie.css">
+    <style>
+        /* Styles supplémentaires pour les améliorations */
+        .search-group {
+            margin-right: 15px;
+        }
+        
+        .search-input {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 250px;
+        }
+        
+        .gallery-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: white;
+        }
+        
+        .masonry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .gallery-item {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background-color: white;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .gallery-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .gallery-info {
+            padding: 15px;
+        }
+        
+        .gallery-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .gallery-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .country-badge {
+            background-color: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .category-badge {
+            background-color: #e9f7ef;
+            color: #27ae60;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+        }
+        
+        .lightbox-info {
+            padding: 20px;
+        }
+        
+        .lightbox-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .lightbox-navigation {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .close-lightbox {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+            z-index: 10;
+            background-color: rgba(0, 0, 0, 0.5);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .load-more {
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .gallery-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+            
+            .masonry-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="main-header">
@@ -66,6 +244,10 @@
     <section class="gallery-section">
         <div class="container">
             <div class="gallery-controls">
+                <div class="search-group">
+                    <label for="searchInput">Recherche:</label>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un plat ou pays...">
+                </div>
                 <div class="filter-group">
                     <label for="continentFilter">Continent:</label>
                     <select id="continentFilter" class="filter-select">
@@ -116,13 +298,14 @@
                     <span id="lightboxCountry"></span>
                     <span id="lightboxCategory"></span>
                 </div>
+                <p id="lightboxCredit" class="lightbox-credit"></p>
             </div>
             <div class="lightbox-navigation">
                 <button class="btn btn-outline" id="prevImage">
-                    <i class="fas fa-chevron-left"></i>
+                    <i class="fas fa-chevron-left"></i> Précédent
                 </button>
                 <button class="btn btn-outline" id="nextImage">
-                    <i class="fas fa-chevron-right"></i>
+                    Suivant <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
         </div>
@@ -249,8 +432,388 @@
 
     <div class="toast" id="toast"></div>
 
+    <script>
+        // Données de la galerie avec des images réelles
+        const galleryData = [
+            {
+                id: 1,
+                title: "Sushi Japonais",
+                description: "Assortiment traditionnel de sushis et sashimis frais, préparés avec du poisson de qualité et du riz vinaigré.",
+                image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Japon",
+                continent: "asia",
+                category: "plat",
+                credit: "Photo par Chinh Le Duc sur Unsplash"
+            },
+            {
+                id: 2,
+                title: "Pizza Margherita",
+                description: "La pizza classique italienne avec sauce tomate, mozzarella fraîche et basilic, cuite au feu de bois.",
+                image: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Italie",
+                continent: "europe",
+                category: "plat",
+                credit: "Photo par Shalom Mwenesi sur Unsplash"
+            },
+            {
+                id: 3,
+                title: "Tacos Mexicains",
+                description: "Tacos authentiques garnis de viande marinée, oignons, coriandre et sauce piquante.",
+                image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Mexique",
+                continent: "americas",
+                category: "plat",
+                credit: "Photo par Chad Montano sur Unsplash"
+            },
+            {
+                id: 4,
+                title: "Croissant Français",
+                description: "Croissant feuilleté au beurre, croustillant à l'extérieur et moelleux à l'intérieur.",
+                image: "https://images.unsplash.com/photo-1555507036-ab794f27d2e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "France",
+                continent: "europe",
+                category: "entree",
+                credit: "Photo par Monika Grabkowska sur Unsplash"
+            },
+            {
+                id: 5,
+                title: "Pad Thaï",
+                description: "Nouilles de riz sautées avec crevettes, tofu, œuf et pousses de soja, aromatisées au tamarin.",
+                image: "https://images.unsplash.com/photo-1559314809-0f155d4a6d8e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Thaïlande",
+                continent: "asia",
+                category: "plat",
+                credit: "Photo par Chad Montano sur Unsplash"
+            },
+            {
+                id: 6,
+                title: "Moules Frites",
+                description: "Moules cuites au vin blanc avec échalotes et persil, servies avec des frites croustillantes.",
+                image: "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Belgique",
+                continent: "europe",
+                category: "plat",
+                credit: "Photo par Eiliv Aceron sur Unsplash"
+            },
+            {
+                id: 7,
+                title: "Couscous Marocain",
+                description: "Plat traditionnel à base de semoule, légumes et viande, épicé avec du ras el hanout.",
+                image: "https://images.unsplash.com/photo-1542528180-a1208c5169a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Maroc",
+                continent: "africa",
+                category: "plat",
+                credit: "Photo par Eiliv Aceron sur Unsplash"
+            },
+            {
+                id: 8,
+                title: "Hamburger Américain",
+                description: "Steak haché grillé, fromage, laitue, tomate et oignon dans un pain brioché.",
+                image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "États-Unis",
+                continent: "americas",
+                category: "plat",
+                credit: "Photo par Amol Sonar sur Unsplash"
+            },
+            {
+                id: 9,
+                title: "Tiramisu",
+                description: "Dessert italien à base de mascarpone, café, cacao et biscuits imbibés.",
+                image: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Italie",
+                continent: "europe",
+                category: "dessert",
+                credit: "Photo par Nadya Spetnitskaya sur Unsplash"
+            },
+            {
+                id: 10,
+                title: "Feijoada Brésilienne",
+                description: "Ragoût de haricots noirs avec différentes viandes, servi avec du riz et des oranges.",
+                image: "https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Brésil",
+                continent: "americas",
+                category: "plat",
+                credit: "Photo por Pixabay"
+            },
+            {
+                id: 11,
+                title: "Mochi Japonais",
+                description: "Pâtisserie traditionnelle japonaise à base de riz gluant, souvent fourrée de pâte de haricots rouges.",
+                image: "https://images.unsplash.com/photo-1567375698349-41da3f8a1c92?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Japon",
+                continent: "asia",
+                category: "dessert",
+                credit: "Photo par Mae Mu sur Unsplash"
+            },
+            {
+                id: 12,
+                title: "Paella Espagnole",
+                description: "Riz safrané cuit avec fruits de mer, poulet, légumes et épices dans une grande poêle.",
+                image: "https://images.unsplash.com/photo-1626700051175-6818013e0331?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Espagne",
+                continent: "europe",
+                category: "plat",
+                credit: "Photo par Pablo Merchán Montes sur Unsplash"
+            },
+            {
+                id: 13,
+                title: "Baklava Turc",
+                description: "Pâtisserie sucrée à base de pâte filo, de noix et de sirop de miel.",
+                image: "https://images.unsplash.com/photo-1588347818122-c6f4dcc17e0e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Turquie",
+                continent: "asia",
+                category: "dessert",
+                credit: "Photo par Eiliv Aceron sur Unsplash"
+            },
+            {
+                id: 14,
+                title: "Pho Vietnamien",
+                description: "Soupe de nouilles de riz avec du bœuf, des herbes fraîches et un bouillon parfumé.",
+                image: "https://images.unsplash.com/photo-1552465011-bf9c683815bd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Vietnam",
+                continent: "asia",
+                category: "plat",
+                credit: "Photo par Ella Olsson sur Unsplash"
+            },
+            {
+                id: 15,
+                title: "Poutine Canadienne",
+                description: "Frites recouvertes de fromage en grains et de sauce brune.",
+                image: "https://images.unsplash.com/photo-1626700051175-6818013e0331?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Canada",
+                continent: "americas",
+                category: "plat",
+                credit: "Photo par Pablo Merchán Montes sur Unsplash"
+            },
+            {
+                id: 16,
+                title: "Bobotie Sud-Africain",
+                description: "Hachis de viande épicé cuit au four avec une garniture à base d'œuf et de lait.",
+                image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Afrique du Sud",
+                continent: "africa",
+                category: "plat",
+                credit: "Photo par Eiliv Aceron sur Unsplash"
+            },
+            {
+                id: 17,
+                title: "Matcha Latte",
+                description: "Boisson japonaise à base de thé vert matcha en poudre et de lait.",
+                image: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Japon",
+                continent: "asia",
+                category: "boisson",
+                credit: "Photo par Nathan Dumlao sur Unsplash"
+            },
+            {
+                id: 18,
+                title: "Fish and Chips",
+                description: "Poisson pané frit servi avec des frites, traditionnellement emballé dans du papier journal.",
+                image: "https://images.unsplash.com/photo-1579208575657-9b423f7c1811?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Royaume-Uni",
+                continent: "europe",
+                category: "plat",
+                credit: "Photo par Eiliv Aceron sur Unsplash"
+            },
+            {
+                id: 19,
+                title: "Döner Kebab",
+                description: "Viande grillée à la verticale servie dans du pain avec des légumes et des sauces.",
+                image: "https://images.unsplash.com/photo-1598214886806-c87b84b7078b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Turquie",
+                continent: "asia",
+                category: "plat",
+                credit: "Photo par Eiliv Aceron sur Unsplash"
+            },
+            {
+                id: 20,
+                title: "Pavlova",
+                description: "Dessert à base de meringue croustillante à l'extérieur et moelleuse à l'intérieur, garnie de fruits.",
+                image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                country: "Australie",
+                continent: "oceania",
+                category: "dessert",
+                credit: "Photo par Eiliv Aceron sur Unsplash"
+            }
+        ];
+
+        // Variables globales
+        let currentFilteredData = [];
+        let currentIndex = 0;
+        let displayedCount = 9;
+
+        // Initialisation de la galerie
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeGallery();
+            setupEventListeners();
+        });
+
+        function initializeGallery() {
+            currentFilteredData = [...galleryData];
+            renderGallery();
+        }
+
+        function renderGallery() {
+            const galleryGrid = document.getElementById('galleryGrid');
+            galleryGrid.innerHTML = '';
+
+            const itemsToShow = currentFilteredData.slice(0, displayedCount);
+
+            if (itemsToShow.length === 0) {
+                galleryGrid.innerHTML = '<p class="no-results">Aucun résultat trouvé. Essayez de modifier vos filtres.</p>';
+                return;
+            }
+
+            itemsToShow.forEach((item, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                galleryItem.setAttribute('data-id', item.id);
+                galleryItem.setAttribute('tabindex', '0');
+                
+                galleryItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.title}" class="gallery-image" loading="lazy">
+                    <div class="gallery-info">
+                        <h3 class="gallery-title">${item.title}</h3>
+                        <div class="gallery-meta">
+                            <span class="country-badge">${item.country}</span>
+                            <span class="category-badge">${item.category}</span>
+                        </div>
+                    </div>
+                `;
+                
+                galleryItem.addEventListener('click', () => openLightbox(index));
+                galleryItem.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        openLightbox(index);
+                    }
+                });
+                
+                galleryGrid.appendChild(galleryItem);
+            });
+
+            // Afficher ou masquer le bouton "Charger plus"
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            if (displayedCount >= currentFilteredData.length) {
+                loadMoreBtn.style.display = 'none';
+            } else {
+                loadMoreBtn.style.display = 'block';
+            }
+        }
+
+        function setupEventListeners() {
+            // Filtres
+            document.getElementById('continentFilter').addEventListener('change', filterGallery);
+            document.getElementById('categoryFilter').addEventListener('change', filterGallery);
+            document.getElementById('searchInput').addEventListener('input', filterGallery);
+            document.getElementById('resetFilters').addEventListener('click', resetFilters);
+            
+            // Lightbox
+            document.getElementById('prevImage').addEventListener('click', showPrevImage);
+            document.getElementById('nextImage').addEventListener('click', showNextImage);
+            document.querySelector('.close-lightbox').addEventListener('click', closeLightbox);
+            
+            // Charger plus d'images
+            document.getElementById('loadMoreBtn').addEventListener('click', loadMoreImages);
+            
+            // Fermer la lightbox en cliquant à l'extérieur
+            document.getElementById('lightbox').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeLightbox();
+                }
+            });
+            
+            // Navigation au clavier dans la lightbox
+            document.addEventListener('keydown', function(e) {
+                const lightbox = document.getElementById('lightbox');
+                if (lightbox.style.display === 'flex') {
+                    if (e.key === 'Escape') {
+                        closeLightbox();
+                    } else if (e.key === 'ArrowLeft') {
+                        showPrevImage();
+                    } else if (e.key === 'ArrowRight') {
+                        showNextImage();
+                    }
+                }
+            });
+        }
+
+        function filterGallery() {
+            const continentFilter = document.getElementById('continentFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            currentFilteredData = galleryData.filter(item => {
+                const matchesContinent = continentFilter === 'all' || item.continent === continentFilter;
+                const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
+                const matchesSearch = searchTerm === '' || 
+                    item.title.toLowerCase().includes(searchTerm) || 
+                    item.country.toLowerCase().includes(searchTerm) ||
+                    item.description.toLowerCase().includes(searchTerm);
+                
+                return matchesContinent && matchesCategory && matchesSearch;
+            });
+            
+            displayedCount = 9;
+            renderGallery();
+        }
+
+        function resetFilters() {
+            document.getElementById('continentFilter').value = 'all';
+            document.getElementById('categoryFilter').value = 'all';
+            document.getElementById('searchInput').value = '';
+            filterGallery();
+        }
+
+        function loadMoreImages() {
+            displayedCount += 9;
+            renderGallery();
+        }
+
+        function openLightbox(index) {
+            currentIndex = index;
+            const item = currentFilteredData[currentIndex];
+            
+            document.getElementById('lightboxImage').src = item.image;
+            document.getElementById('lightboxImage').alt = item.title;
+            document.getElementById('lightboxTitle').textContent = item.title;
+            document.getElementById('lightboxDescription').textContent = item.description;
+            document.getElementById('lightboxCountry').textContent = item.country;
+            document.getElementById('lightboxCategory').textContent = item.category;
+            document.getElementById('lightboxCredit').textContent = item.credit;
+            
+            document.getElementById('lightbox').style.display = 'flex';
+            
+            // Mettre à jour l'état des boutons de navigation
+            updateNavigationButtons();
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').style.display = 'none';
+        }
+
+        function showPrevImage() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                openLightbox(currentIndex);
+            }
+        }
+
+        function showNextImage() {
+            if (currentIndex < currentFilteredData.length - 1) {
+                currentIndex++;
+                openLightbox(currentIndex);
+            }
+        }
+
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevImage');
+            const nextBtn = document.getElementById('nextImage');
+            
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === currentFilteredData.length - 1;
+        }
+    </script>
     <script src="../js/utils.js"></script>
     <script src="../js/auth.js"></script>
-    <script src="../js/gallery.js"></script>
 </body>
 </html>

@@ -1,118 +1,275 @@
-// Gestionnaire d'authentification
+// Authentication system for GastroGlobe
 class AuthManager {
-    static users = [];
-    static currentUser = null;
-
-    static init() {
-        // Charger les utilisateurs depuis le localStorage
-        const savedUsers = localStorage.getItem('gastroglobe-users');
-        if (savedUsers) {
-            this.users = JSON.parse(savedUsers);
-        }
-
-        // Charger l'utilisateur actuel
-        const savedCurrentUser = localStorage.getItem('gastroglobe-current-user');
-        if (savedCurrentUser) {
-            this.currentUser = JSON.parse(savedCurrentUser);
-        }
-
-        this.setupAuthEventListeners();
+    constructor() {
+        this.currentUser = null;
+        this.users = [];
+        this.isInitialized = false;
+        this.init();
     }
 
-    static setupAuthEventListeners() {
-        // Modals
-        const loginModal = document.getElementById('loginModal');
-        const registerModal = document.getElementById('registerModal');
-        const closeModals = document.querySelectorAll('.close-modal');
-        const switchToRegister = document.getElementById('switchToRegister');
-        const switchToLogin = document.getElementById('switchToLogin');
-        const logoutBtn = document.getElementById('logoutBtn');
+    init() {
+        if (this.isInitialized) return;
+        
+        this.loadUsers();
+        this.loadCurrentUser();
+        this.setupEventListeners();
+        this.updateAuthUI();
+        this.isInitialized = true;
+        
+        console.log('AuthManager initialized');
+    }
 
-        // Boutons d'ouverture des modals
+    // Data management
+    loadUsers() {
+        const savedUsers = StorageManager.get('users', []);
+        
+        if (savedUsers.length === 0) {
+            // Create demo users
+            this.users = [
+                {
+                    id: 1,
+                    name: "Jean Dupont",
+                    email: "jean@example.com",
+                    password: "password123",
+                    avatar: "👨‍🍳",
+                    memberSince: "2024-01-15",
+                    favorites: [1, 3, 5],
+                    quizScore: 150,
+                    history: [
+                        { type: "recipe_view", itemId: 1, date: "2024-01-20" },
+                        { type: "quiz_completed", score: 50, date: "2024-01-22" },
+                        { type: "recipe_view", itemId: 3, date: "2024-01-25" },
+                        { type: "quiz_completed", score: 100, date: "2024-02-01" }
+                    ],
+                    settings: {
+                        language: "fr",
+                        notifications: true,
+                        theme: "light"
+                    }
+                },
+                {
+                    id: 2,
+                    name: "Marie Martin",
+                    email: "marie@example.com",
+                    password: "password123",
+                    avatar: "👩‍🍳",
+                    memberSince: "2024-02-01",
+                    favorites: [2, 4],
+                    quizScore: 75,
+                    history: [
+                        { type: "recipe_view", itemId: 2, date: "2024-02-02" },
+                        { type: "quiz_completed", score: 75, date: "2024-02-03" }
+                    ],
+                    settings: {
+                        language: "fr",
+                        notifications: false,
+                        theme: "dark"
+                    }
+                }
+            ];
+            this.saveUsers();
+        } else {
+            this.users = savedUsers;
+        }
+    }
+
+    loadCurrentUser() {
+        const savedUser = StorageManager.get('current_user');
+        if (savedUser) {
+            this.currentUser = savedUser;
+            console.log('User loaded from storage:', savedUser.name);
+        }
+    }
+
+    saveUsers() {
+        StorageManager.set('users', this.users);
+    }
+
+    saveCurrentUser() {
+        if (this.currentUser) {
+            StorageManager.set('current_user', this.currentUser);
+        } else {
+            StorageManager.remove('current_user');
+        }
+    }
+
+    // Event listeners
+    setupEventListeners() {
+        // Modal triggers
         document.getElementById('loginBtn')?.addEventListener('click', () => this.showLoginModal());
         document.getElementById('registerBtn')?.addEventListener('click', () => this.showRegisterModal());
-
-        // Fermeture des modals
-        closeModals.forEach(btn => {
-            btn.addEventListener('click', () => {
-                loginModal.style.display = 'none';
-                registerModal.style.display = 'none';
-            });
+        document.getElementById('logoutBtn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.logout();
         });
 
-        // Navigation entre modals
-        if (switchToRegister) {
-            switchToRegister.addEventListener('click', (e) => {
-                e.preventDefault();
-                loginModal.style.display = 'none';
-                registerModal.style.display = 'flex';
-            });
-        }
+        // Modal close buttons
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', () => this.closeModals());
+        });
 
-        if (switchToLogin) {
-            switchToLogin.addEventListener('click', (e) => {
-                e.preventDefault();
-                registerModal.style.display = 'none';
-                loginModal.style.display = 'flex';
-            });
-        }
+        // Modal switches
+        document.getElementById('switchToRegister')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.switchToRegister();
+        });
 
-        // Déconnexion
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => this.logout());
-        }
+        document.getElementById('switchToLogin')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.switchToLogin();
+        });
 
-        // Formulaires
+        // Form submissions
         document.getElementById('loginForm')?.addEventListener('submit', (e) => this.handleLogin(e));
         document.getElementById('registerForm')?.addEventListener('submit', (e) => this.handleRegister(e));
 
-        // Sélection d'avatar
+        // Avatar selection
         this.setupAvatarSelection();
+
+        // Close modals on outside click
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                this.closeModals();
+            }
+        });
+
+        // Password strength indicator
+        this.setupPasswordStrength();
     }
 
-    static setupAvatarSelection() {
-        const avatarOptions = document.querySelectorAll('.avatar-option');
-        avatarOptions.forEach(option => {
+    setupAvatarSelection() {
+        document.querySelectorAll('.avatar-option').forEach(option => {
             option.addEventListener('click', () => {
-                avatarOptions.forEach(opt => opt.classList.remove('selected'));
+                // Remove selected class from all options
+                document.querySelectorAll('.avatar-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                // Add selected class to clicked option
                 option.classList.add('selected');
             });
         });
     }
 
-    static showLoginModal() {
+    setupPasswordStrength() {
+        const passwordInput = document.getElementById('registerPassword');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', (e) => {
+                this.updatePasswordStrength(e.target.value);
+            });
+        }
+    }
+
+    updatePasswordStrength(password) {
+        const strength = FormValidator.getPasswordStrength(password);
+        const strengthBar = document.querySelector('.strength-bar');
+        const strengthText = document.querySelector('.strength-text');
+        
+        if (strengthBar) {
+            strengthBar.className = 'strength-bar';
+            if (strength.strength > 0) {
+                strengthBar.classList.add(`strength-${['weak', 'medium', 'strong', 'strong'][strength.strength - 1]}`);
+            }
+        }
+        
+        if (strengthText) {
+            strengthText.textContent = strength.label;
+        }
+    }
+
+    // Modal management
+    showLoginModal() {
+        this.closeModals();
         document.getElementById('loginModal').style.display = 'flex';
+        document.getElementById('loginEmail').focus();
     }
 
-    static showRegisterModal() {
+    showRegisterModal() {
+        this.closeModals();
         document.getElementById('registerModal').style.display = 'flex';
+        document.getElementById('registerName').focus();
+        
+        // Reset avatar selection
+        const firstAvatar = document.querySelector('.avatar-option');
+        if (firstAvatar) {
+            document.querySelectorAll('.avatar-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            firstAvatar.classList.add('selected');
+        }
     }
 
-    static handleLogin(e) {
+    closeModals() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.style.display = 'none';
+        });
+        
+        // Reset forms
+        this.resetForms();
+    }
+
+    switchToRegister() {
+        document.getElementById('loginModal').style.display = 'none';
+        this.showRegisterModal();
+    }
+
+    switchToLogin() {
+        document.getElementById('registerModal').style.display = 'none';
+        this.showLoginModal();
+    }
+
+    resetForms() {
+        document.querySelectorAll('form').forEach(form => {
+            form.reset();
+            form.querySelectorAll('.error-message').forEach(error => error.remove());
+            form.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('error', 'success');
+            });
+        });
+        
+        // Reset password strength
+        const strengthBar = document.querySelector('.strength-bar');
+        if (strengthBar) {
+            strengthBar.className = 'strength-bar';
+            strengthBar.style.width = '0%';
+        }
+    }
+
+    // Form handling
+    async handleLogin(e) {
         e.preventDefault();
         
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
+        const submitBtn = e.target.querySelector('button[type="submit"]');
 
-        const user = this.users.find(u => u.email === email && u.password === password);
+        // Validation
+        if (!this.validateLoginForm(email, password)) return;
 
-        if (user) {
-            this.currentUser = user;
-            localStorage.setItem('gastroglobe-current-user', JSON.stringify(user));
+        // Show loading state
+        this.setButtonLoading(submitBtn, true);
+
+        try {
+            // Simulate API call
+            await ApiSimulator.simulateRequest(1000);
             
-            document.getElementById('loginModal').style.display = 'none';
-            showToast('Connexion réussie ! Bienvenue sur GastroGlobe.');
+            const user = this.authenticateUser(email, password);
             
-            // Mettre à jour l'UI
-            if (window.app) {
-                window.app.updateUI();
+            if (user) {
+                this.login(user);
+                showToast(`Bienvenue ${user.name} !`, 'success');
+            } else {
+                throw new Error('Identifiants incorrects');
             }
-        } else {
-            showToast('Email ou mot de passe incorrect.', 'error');
+        } catch (error) {
+            showToast(error.message, 'error');
+            this.markFieldAsError(document.getElementById('loginEmail'));
+            this.markFieldAsError(document.getElementById('loginPassword'));
+        } finally {
+            this.setButtonLoading(submitBtn, false);
         }
     }
 
-    static handleRegister(e) {
+    async handleRegister(e) {
         e.preventDefault();
         
         const name = document.getElementById('registerName').value;
@@ -120,109 +277,298 @@ class AuthManager {
         const password = document.getElementById('registerPassword').value;
         const confirmPassword = document.getElementById('registerConfirmPassword').value;
         const selectedAvatar = document.querySelector('.avatar-option.selected')?.getAttribute('data-avatar') || '👨‍🍳';
+        const submitBtn = e.target.querySelector('button[type="submit"]');
 
         // Validation
+        if (!this.validateRegisterForm(name, email, password, confirmPassword)) return;
+
+        // Show loading state
+        this.setButtonLoading(submitBtn, true);
+
+        try {
+            // Simulate API call
+            await ApiSimulator.simulateRequest(1500);
+            
+            const user = this.createUser(name, email, password, selectedAvatar);
+            this.login(user);
+            showToast(`Compte créé avec succès ! Bienvenue ${name}`, 'success');
+        } catch (error) {
+            showToast(error.message, 'error');
+        } finally {
+            this.setButtonLoading(submitBtn, false);
+        }
+    }
+
+    // Validation methods
+    validateLoginForm(email, password) {
+        let isValid = true;
+
+        // Clear previous errors
+        this.clearFieldErrors('loginForm');
+
+        if (!FormValidator.validateEmail(email)) {
+            this.markFieldAsError(document.getElementById('loginEmail'), 'Email invalide');
+            isValid = false;
+        }
+
+        if (!password) {
+            this.markFieldAsError(document.getElementById('loginPassword'), 'Mot de passe requis');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    validateRegisterForm(name, email, password, confirmPassword) {
+        let isValid = true;
+
+        // Clear previous errors
+        this.clearFieldErrors('registerForm');
+
+        if (!FormValidator.validateName(name)) {
+            this.markFieldAsError(document.getElementById('registerName'), 'Le nom doit contenir entre 2 et 50 caractères');
+            isValid = false;
+        }
+
+        if (!FormValidator.validateEmail(email)) {
+            this.markFieldAsError(document.getElementById('registerEmail'), 'Email invalide');
+            isValid = false;
+        } else if (this.userExists(email)) {
+            this.markFieldAsError(document.getElementById('registerEmail'), 'Un compte avec cet email existe déjà');
+            isValid = false;
+        }
+
+        if (!FormValidator.validatePassword(password)) {
+            this.markFieldAsError(document.getElementById('registerPassword'), 'Le mot de passe doit contenir au moins 6 caractères');
+            isValid = false;
+        }
+
         if (password !== confirmPassword) {
-            showToast('Les mots de passe ne correspondent pas.', 'error');
-            return;
+            this.markFieldAsError(document.getElementById('registerConfirmPassword'), 'Les mots de passe ne correspondent pas');
+            isValid = false;
         }
 
-        if (password.length < 6) {
-            showToast('Le mot de passe doit contenir au moins 6 caractères.', 'error');
-            return;
-        }
+        return isValid;
+    }
 
-        if (this.users.find(u => u.email === email)) {
-            showToast('Un compte avec cet email existe déjà.', 'error');
-            return;
-        }
+    // User management
+    authenticateUser(email, password) {
+        return this.users.find(user => 
+            user.email === email && user.password === password
+        );
+    }
 
-        // Créer un nouvel utilisateur
+    userExists(email) {
+        return this.users.some(user => user.email === email);
+    }
+
+    createUser(name, email, password, avatar) {
         const newUser = {
-            id: this.users.length + 1,
-            name: name,
-            email: email,
+            id: Math.max(...this.users.map(u => u.id), 0) + 1,
+            name: name.trim(),
+            email: email.toLowerCase().trim(),
             password: password,
-            avatar: selectedAvatar,
+            avatar: avatar,
             memberSince: new Date().toISOString().split('T')[0],
             favorites: [],
             quizScore: 0,
             history: [],
             settings: {
                 language: "fr",
-                notifications: true
+                notifications: true,
+                theme: "light"
             }
         };
 
         this.users.push(newUser);
-        this.currentUser = newUser;
-
-        localStorage.setItem('gastroglobe-users', JSON.stringify(this.users));
-        localStorage.setItem('gastroglobe-current-user', JSON.stringify(newUser));
-
-        document.getElementById('registerModal').style.display = 'none';
-        showToast('Inscription réussie ! Bienvenue sur GastroGlobe.');
-
-        // Mettre à jour l'UI
-        if (window.app) {
-            window.app.updateUI();
-        }
-    }
-
-    static logout() {
-        this.currentUser = null;
-        localStorage.removeItem('gastroglobe-current-user');
-        showToast('Vous avez été déconnecté avec succès.');
+        this.saveUsers();
         
-        // Mettre à jour l'UI
-        if (window.app) {
-            window.app.updateUI();
+        return newUser;
+    }
+
+    login(user) {
+        this.currentUser = user;
+        this.saveCurrentUser();
+        this.closeModals();
+        this.updateAuthUI();
+        
+        // Dispatch login event
+        window.dispatchEvent(new CustomEvent('authChange', { 
+            detail: { user: this.currentUser, type: 'login' }
+        }));
+    }
+
+    logout() {
+        this.currentUser = null;
+        this.saveCurrentUser();
+        this.updateAuthUI();
+        showToast('Vous avez été déconnecté avec succès', 'success');
+        
+        // Dispatch logout event
+        window.dispatchEvent(new CustomEvent('authChange', { 
+            detail: { user: null, type: 'logout' }
+        }));
+    }
+
+    // UI updates
+    updateAuthUI() {
+        const userMenu = document.getElementById('userMenu');
+        const authButtons = document.getElementById('authButtons');
+        const userAvatarHeader = document.getElementById('userAvatarHeader');
+        const userNameHeader = document.getElementById('userNameHeader');
+
+        if (this.currentUser) {
+            // User is logged in
+            DOMUtils.show(userMenu);
+            DOMUtils.hide(authButtons);
+            
+            if (userAvatarHeader) {
+                userAvatarHeader.textContent = this.currentUser.avatar;
+            }
+            if (userNameHeader) {
+                userNameHeader.textContent = this.currentUser.name;
+            }
+        } else {
+            // User is not logged in
+            DOMUtils.hide(userMenu);
+            DOMUtils.show(authButtons);
         }
     }
 
-    static getCurrentUser() {
+    // Utility methods
+    markFieldAsError(field, message = '') {
+        if (!field) return;
+        
+        const formGroup = field.closest('.form-group');
+        if (formGroup) {
+            formGroup.classList.add('error');
+            formGroup.classList.remove('success');
+            
+            // Remove existing error message
+            const existingError = formGroup.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // Add new error message
+            if (message) {
+                const errorElement = document.createElement('div');
+                errorElement.className = 'error-message';
+                errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+                formGroup.appendChild(errorElement);
+            }
+        }
+    }
+
+    clearFieldErrors(formId) {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('error', 'success');
+                const errorMessage = group.querySelector('.error-message');
+                if (errorMessage) {
+                    errorMessage.remove();
+                }
+            });
+        }
+    }
+
+    setButtonLoading(button, isLoading) {
+        if (!button) return;
+        
+        if (isLoading) {
+            button.disabled = true;
+            button.classList.add('btn-loading');
+        } else {
+            button.disabled = false;
+            button.classList.remove('btn-loading');
+        }
+    }
+
+    // Public methods
+    getCurrentUser() {
         return this.currentUser;
     }
 
-    static toggleUserFavorite(recipeId) {
-        if (!this.currentUser) return;
+    isAuthenticated() {
+        return this.currentUser !== null;
+    }
 
+    updateUserProfile(updates) {
+        if (!this.currentUser) return false;
+        
         const userIndex = this.users.findIndex(u => u.id === this.currentUser.id);
-        if (userIndex === -1) return;
+        if (userIndex === -1) return false;
+        
+        this.users[userIndex] = { ...this.users[userIndex], ...updates };
+        this.currentUser = this.users[userIndex];
+        this.saveUsers();
+        this.saveCurrentUser();
+        
+        return true;
+    }
 
+    toggleFavorite(recipeId) {
+        if (!this.currentUser) return false;
+        
+        const userIndex = this.users.findIndex(u => u.id === this.currentUser.id);
+        if (userIndex === -1) return false;
+        
         const favoriteIndex = this.users[userIndex].favorites.indexOf(recipeId);
         
         if (favoriteIndex > -1) {
-            // Retirer des favoris
+            // Remove from favorites
             this.users[userIndex].favorites.splice(favoriteIndex, 1);
         } else {
-            // Ajouter aux favoris
+            // Add to favorites
             this.users[userIndex].favorites.push(recipeId);
         }
-
-        // Mettre à jour l'utilisateur actuel
-        this.currentUser = this.users[userIndex];
         
-        // Sauvegarder
-        localStorage.setItem('gastroglobe-users', JSON.stringify(this.users));
-        localStorage.setItem('gastroglobe-current-user', JSON.stringify(this.currentUser));
+        this.currentUser = this.users[userIndex];
+        this.saveUsers();
+        this.saveCurrentUser();
+        
+        return true;
     }
 
-    static updateUserQuizScore(score) {
-        if (!this.currentUser) return;
-
+    addToHistory(item) {
+        if (!this.currentUser) return false;
+        
         const userIndex = this.users.findIndex(u => u.id === this.currentUser.id);
-        if (userIndex === -1) return;
-
-        this.users[userIndex].quizScore += score;
+        if (userIndex === -1) return false;
+        
+        this.users[userIndex].history.unshift({
+            ...item,
+            date: new Date().toISOString().split('T')[0]
+        });
+        
+        // Keep only last 50 history items
+        this.users[userIndex].history = this.users[userIndex].history.slice(0, 50);
+        
         this.currentUser = this.users[userIndex];
+        this.saveUsers();
+        this.saveCurrentUser();
+        
+        return true;
+    }
 
-        localStorage.setItem('gastroglobe-users', JSON.stringify(this.users));
-        localStorage.setItem('gastroglobe-current-user', JSON.stringify(this.currentUser));
+    updateQuizScore(points) {
+        if (!this.currentUser) return false;
+        
+        const userIndex = this.users.findIndex(u => u.id === this.currentUser.id);
+        if (userIndex === -1) return false;
+        
+        this.users[userIndex].quizScore += points;
+        this.currentUser = this.users[userIndex];
+        this.saveUsers();
+        this.saveCurrentUser();
+        
+        return true;
     }
 }
 
-// Initialiser l'authentification
-document.addEventListener('DOMContentLoaded', () => {
-    AuthManager.init();
-});
+// Create global auth instance
+window.authManager = new AuthManager();
+
+// Export for use in other modules
+window.AuthManager = AuthManager;
